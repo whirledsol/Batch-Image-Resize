@@ -32,6 +32,7 @@ class SettingsStatus(Enum):
 
 
 class Application(Frame):
+
     def set_properties_defaults(self):
         """
         Set the default values for our class properties
@@ -231,7 +232,7 @@ class Application(Frame):
             return SettingsStatus.directory_does_not_exist
 
         # Check if width and height are digits
-        if (not self.export_properties["width"].get().isdigit()) or \
+        if (not self.export_properties["width"].get().isdigit()) and \
                 (not self.export_properties["height"].get().isdigit()):
             return SettingsStatus.invalid_dimensions
 
@@ -257,7 +258,7 @@ class Application(Frame):
                 ],
                 SettingsStatus.invalid_dimensions: [
                     "Invalid dimensions",
-                    "Width and height must be integers"
+                    "Supply at least a width or height as integers."
                 ],
             }
             messagebox.showerror(*error_messages[settings_status])
@@ -271,14 +272,25 @@ class Application(Frame):
                 q = queue.Queue()
                 my_thread = threading.Thread(target=self.img_edit.export_all_in_dir,
                                              args=(self.selected_directory.get(),
-                                                   int(self.export_properties["width"].get()),
-                                                   int(self.export_properties["height"].get()),
+                                                   self.intTryParse(self.export_properties["width"].get()),
+                                                   self.intTryParse(self.export_properties["height"].get()),
                                                    self.export_properties["type"].get(),
                                                    self.overwrite_original.get(),
                                                    q)
                                              )
                 my_thread.start()
                 self.exporting_interval(q)
+
+
+    def intTryParse(self,value,backup=None):
+        """
+        try parse and graceful fail
+        """
+        try:
+            return int(value)
+        except ValueError:
+            return None or backup
+
 
     def browse_for_directory(self):
         """

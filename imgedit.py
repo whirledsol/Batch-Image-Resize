@@ -71,6 +71,13 @@ class ImgEdit(object):
         try:
             # open the given image, resize and save it
             img = PIL.Image.open(img_path)
+            
+            #if a dimention is missing, resolve it while maintaing aspect ratio
+            original_width, original_height = img.size
+            aspect_ratio = original_width/original_height
+            width = width or int(round(height*aspect_ratio))
+            height = height or int(round(width/aspect_ratio))
+            
             img = img.resize((width, height), PIL.Image.ANTIALIAS)
             img.save(os.path.join(path, dest_img_name))
         except IOError:
